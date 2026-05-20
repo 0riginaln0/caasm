@@ -88,72 +88,155 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err) {
     return false;
   }
 
+  // Init to NULL all non-existing callbacks. though, maybe they are already...
+
   return true;
 }
 
+/*
+  // Callback execution order
+  // 1. Runtime-level: before_all_events
+  runtime->before_all_events
+
+  // 2. Event-level: before
+  event->before
+
+  // 3. Event-level: guards
+  event->guards
+
+  // 4. Transition-level: guards (for the matching transition)
+  transition->guards
+
+  // If any guard fails (steps 3 or 4), the transition is aborted and
+  // no further callbacks execute
+
+  // 5. Old state: before_exit
+  old_state->before_exit
+
+  // 6. Old state: exit
+  old_state->exit
+
+  // 7. Runtime-level: after_all_transitions
+  runtime->after_all_transitions
+
+  // 8. Transition-level: after
+  transition->after
+
+  // 9. New state: before_enter
+  new_state->before_enter
+
+  // 10. New state: enter
+  new_state->enter
+
+  // 11. UPDATE STATE (runtime->current_state = new_state)
+
+  // 12. Old state: after_exit
+  old_state->after_exit
+
+  // 13. New state: after_enter
+  new_state->after_enter
+
+  // 14. Event-level: after
+  event->after
+
+  // 15. Runtime-level: after_all_events
+  runtime->after_all_events
+*/
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
-  /*
-    // Callback execution order
-    // 1. Runtime-level: before_all_events
-    runtime->before_all_events
+  void *ctx = runtime->ctx;
 
-    // 2. Event-level: before
-    event->before
-
-    // 3. Event-level: guards
-    event->guards
-
-    // 4. Transition-level: guards (for the matching transition)
-    transition->guards
-
-    // If any guard fails (steps 3 or 4), the transition is aborted and
-    // no further callbacks execute
-
-    // 5. Old state: before_exit
-    old_state->before_exit
-
-    // 6. Old state: exit
-    old_state->exit
-
-    // 7. Runtime-level: after_all_transitions
-    runtime->after_all_transitions
-
-    // 8. Transition-level: after
-    transition->after
-
-    // 9. New state: before_enter
-    new_state->before_enter
-
-    // 10. New state: enter
-    new_state->enter
-
-    // 11. UPDATE STATE (runtime->current_state = new_state)
-
-    // 12. Old state: after_exit
-    old_state->after_exit
-
-    // 13. New state: after_enter
-    new_state->after_enter
-
-    // 14. Event-level: after
-    event->after
-
-    // 15. Runtime-level: after_all_events
-    runtime->after_all_events
-  */
-
+  // 1. Runtime-level: before_all_events
+  runtime->before_all_events(ctx);
 
   // Let's find the event to fire!
   const AASM_Event *event = NULL;
-  // TODO: find an event to dispatch
-  if (event == NULL) return false;
-
-  // Let's try to trigger the transitions of this event
-  // TODO: find transition. if transition successed, return true
-
-
-
+  for (int i = 0; i < runtime->events_count; i++) {
+    if (runtime->events[i].id == event_id) {
+      event = &runtime->events[i];
+      goto found_event;
+    }
+  }
   return false;
+
+ found_event:
+
+  // 2. Event-level: before
+  event->before(ctx);
+
+  // 3. Event-level: guards
+  bool event_guards_passed = false;
+  event_guards_passed = event->guard(ctx);
+  if (!event_guards_passed) return false;
+
+  // Is there even a transition for the event from the current state?
+  const AASM_Transition *transition = NULL;
+  for (int i = 0; i < event->transitions_count; i++) {
+    const AASM_Transition *temp_transition = &event->transitions[i];
+    for (int i = 0; i < temp_transition->from_count; i++) {
+      if (temp_transition->from[i] == runtime->current_state) {
+        transition = temp_transition;
+        goto found_transition;
+      }
+    }
+  }
+  return false;
+
+ found_transition:
+
+  // 4. Transition-level: guards (for the matching transition)
+  bool transition_guards_passed = false;
+  transition_guards_passed = transition->guard(ctx);
+  if (!transition_guards_passed) return false;
+
+  // 5. Old state: before_exit
+  const AASM_State *old_state = NULL;
+  for (int i = 0; i < runtime->states_count; i++) {
+    if (runtime->current_state == runtime->states[i].id) {
+      old_state = &runtime->states[i];
+      break;
+    }
+  }
+  if (old_state->before_exit) old_state->before_exit(ctx);
+
+  // 6. Old state: exit
+  if (old_state->exit) old_state->exit(ctx);
+
+  // 7. Runtime-level: after_all_transitions
+  if (runtime->after_all_transitions) runtime->after_all_transitions(ctx);
+
+
+  // 8. Transition-level: after
+  if (transition->after) transition->after(ctx);
+
+  // 9. New state: before_enter
+  const AASM_State *new_state = NULL;
+  for (int i = 0; i < runtime->states_count; i++) {
+    if (transition->to == runtime->states[i].id) {
+      new_state = &runtime->states[i];
+      break;
+    }
+  }
+  if (new_state->before_enter) new_state->before_enter(ctx);
+
+  // 10. New state: enter
+  if (new_state->enter) new_state->enter(ctx);
+
+  // 11. UPDATE STATE (runtime->current_state = new_state)
+  runtime->current_state = new_state->id;
+
+  // 12. Old state: after_exit
+  if (old_state->after_exit) old_state->after_exit(ctx);
+
+  // 13. New state: after_enter
+  if (new_state->after_enter) new_state->after_enter(ctx);
+
+  // 14. Event-level: after
+  if (event->after) event->after(ctx);
+
+  // 15. Runtime-level: after_all_events
+  if (runtime->after_all_events) runtime->after_all_events(ctx);
+
+  return true;
 }
 
 #endif
