@@ -1,8 +1,85 @@
-Experiment of bringing Ruby's AASM into C.
+Experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
-examples/traffic_light.c - the most straighforward way to use cAASM.
+A single-header library for allocation-free FSM definition with powerful DSL.
 
-examples/job.c - fancy macros eliminating boilerplate, interactive demo for sending events, watching the transitions trigger or not!
+Interactive demo examples:
+
+- `job.c`: separate arrays for states, events, transitions. Begin with this example.
+- `job_inplace.c`: In‑place FSM definition using compound literals. (Check this example to compare with the next example)
+- `job_macros.c`: Fancy macros eliminating all boilerplate.
+
+All callbacks are optional. The order of calling the callbacks is documented in `caasm.h`.
+
+The Ruby's original AASM Job code:
+```ruby
+class Job
+  include AASM
+
+  aasm do
+    state :sleeping, initial: true
+    state :running, :cleaning
+
+    event :run do
+      transitions from: :sleeping, to: :running
+    end
+
+    event :clean do
+      transitions from: :running, to: :cleaning
+    end
+
+    event :sleep do
+      transitions from: [:running, :cleaning], to: :sleeping
+    end
+  end
+
+end
+```
+
+The C AASM Job code:
+```c
+enum State {
+  STATE_SLEEPING,
+  STATE_RUNNING,
+  STATE_CLEANING,
+};
+
+enum Event {
+  EVENT_RUN,
+  EVENT_CLEAN,
+  EVENT_SLEEP,
+};
+
+static AASM_Runtime runtime = {
+  AASM_STATES(
+    AASM_STATE(STATE_SLEEPING, .is_initial = true),
+    AASM_STATE(STATE_RUNNING),
+    AASM_STATE(STATE_CLEANING)
+  ),
+
+  AASM_EVENTS(
+    AASM_EVENT(EVENT_RUN,
+      AASM_TRANSITIONS({
+        AASM_FROM(STATE_SLEEPING), .to = STATE_RUNNING
+      })
+    ),
+    
+    AASM_EVENT(EVENT_CLEAN,
+      AASM_TRANSITIONS({
+        AASM_FROM(STATE_RUNNING), .to = STATE_CLEANING
+      })
+    ),
+    
+    AASM_EVENT(EVENT_SLEEP,
+      AASM_TRANSITIONS({
+        AASM_FROM(STATE_RUNNING, STATE_CLEANING), .to = STATE_SLEEPING
+      })
+    )
+  )
+};
+```
+
+
+
 
 - AASM_Runtime
   - Fields:
@@ -12,6 +89,7 @@ examples/job.c - fancy macros eliminating boilerplate, interactive demo for send
     - before_all_events
     - after_all_transitions
     - after_all_events
+
 - AASM_State
   - Fields:
     - id (AASM_State_ID)
@@ -23,6 +101,7 @@ examples/job.c - fancy macros eliminating boilerplate, interactive demo for send
     - before_exit
     - exit
     - after_exit
+
 - AASM_Event
   - Fields:
     - id (AASM_Event_ID)
@@ -31,6 +110,7 @@ examples/job.c - fancy macros eliminating boilerplate, interactive demo for send
     - before
     - guards
     - after
+
 - AASM_Transition
   - Fields:
     - from (array of AASM_State_ID)
@@ -38,43 +118,3 @@ examples/job.c - fancy macros eliminating boilerplate, interactive demo for send
   - Callbacks:
     - guards
     - after
-
-```ruby
-aasm do
-  # Global callbacks
-  before_all_events :before_all_events
-  after_all_transitions :log_all_transitions
-  after_all_events :after_all_events
-
-
-  # State callbacks with all lifecycle hooks
-  state :open, initial: true,
-        before_exit: :before_exit_open,
-        exit: :exit_open,
-        after_exit: :after_exit_open
-
-  state :closed,
-        before_enter: :before_enter_closed,
-        enter: :enter_closed,
-        after_enter: :after_enter_closed
-
-  # Event with all possible callbacks
-  event :close,
-        before_all_events: :before_all_events,
-        before: :before_event,
-        after: :after_event,
-        after_all_events: :after_all_events,
-        success: :event_success,
-        error: :event_error,
-        error_on_all_events: :error_on_all_events,
-        ensure: :ensure_event,
-        ensure_on_all_events: :ensure_on_all_events,
-        before_success: :before_success_event do
-
-    # Inside events
-    transitions from: :open, to: :closed,
-                after: :transition_after,
-                success: :transition_success
-  end
-end
-```

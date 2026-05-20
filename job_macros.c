@@ -3,7 +3,12 @@
 #include <stdio.h>
 
 #define AASM_IMPLEMENTATION
-#include "caasm2.h"
+#include "caasm.h"
+
+#define RED    "\033[31m"
+#define GREEN  "\033[32m"
+#define YELLOW "\033[33m"
+#define RESET  "\033[0m"
 
 enum State {
   STATE_SLEEPING,
@@ -46,39 +51,32 @@ static int parse_event(const char* input, AASM_Event_ID* event) {
   return 0;
 }
 
-static const AASM_State fsm_states[] = {
-  { .id = STATE_SLEEPING, .is_initial = true },
-  { .id = STATE_RUNNING,  .is_initial = false },
-  { .id = STATE_CLEANING, .is_initial = false },
-};
-
-static const AASM_Transition run_transitions[] = {{
-    .from = (AASM_State_ID[]){STATE_SLEEPING},
-    .from_count = 1,
-    .to = STATE_RUNNING,
-}};
-
-static const AASM_Transition clean_transitions[] = {{
-  .from = (AASM_State_ID[]) { STATE_RUNNING }, .from_count = 1,
-  .to = STATE_CLEANING,
-}};
-
-static const AASM_Transition sleep_transitions[] = {{
-  .from = (AASM_State_ID[]) { STATE_RUNNING, STATE_CLEANING }, .from_count = 2,
-  .to = STATE_SLEEPING,
-}};
-
-static const AASM_Event fsm_events[] = {
-  { .id = EVENT_SLEEP, .transitions = sleep_transitions, .transitions_count = 1 },
-  { .id = EVENT_CLEAN, .transitions = clean_transitions, .transitions_count = 1 },
-  { .id = EVENT_RUN,   .transitions = run_transitions,   .transitions_count = 1 }
-};
-
 static AASM_Runtime runtime = {
-  .states = fsm_states,
-  .states_count = 3,
-  .events = fsm_events,
-  .events_count = 3,
+  AASM_STATES(
+    AASM_STATE(STATE_SLEEPING, .is_initial = true),
+    AASM_STATE(STATE_RUNNING),
+    AASM_STATE(STATE_CLEANING)
+  ),
+
+  AASM_EVENTS(
+    AASM_EVENT(EVENT_RUN,
+      AASM_TRANSITIONS({
+        AASM_FROM(STATE_SLEEPING), .to = STATE_RUNNING
+      })
+    ),
+    
+    AASM_EVENT(EVENT_CLEAN,
+      AASM_TRANSITIONS({
+        AASM_FROM(STATE_RUNNING), .to = STATE_CLEANING
+      })
+    ),
+    
+    AASM_EVENT(EVENT_SLEEP,
+      AASM_TRANSITIONS({
+        AASM_FROM(STATE_RUNNING, STATE_CLEANING), .to = STATE_SLEEPING
+      })
+    )
+  )
 };
 
 int main(void) {
@@ -111,17 +109,16 @@ int main(void) {
 
     AASM_Event_ID ev;
     if (!parse_event(line, &ev)) {
-      printf("Unknown event: '%s'.\n"
+      printf(YELLOW"Unknown event: '%s'.\n"RESET
              "Please enter (r)un, (c)lean, (s)leap (type (q)uit to exit)\n\n", line);
       continue;
     }
 
     bool transition_occurred = aasm_fire_event(&runtime, ev);
     if (transition_occurred) {
-      printf("--> Transition succeeded. New state: %s\n\n",
-             state_to_string(runtime.current_state));
+      printf(GREEN"Transition succeeded.\n"RESET);
     } else {
-      printf("--> Transition ignored (no valid transition from current state).\n\n");
+      printf(RED"Transition ignored (no valid transition found).\n"RESET);
     }
   }
   return 0;
