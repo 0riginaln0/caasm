@@ -55,7 +55,7 @@ static const AASM_Transition timer_transitions[] = {
 };
 
 static const AASM_Event events[] = {
-  {.event_id = EVENT_TIMER, 
+  {.id = EVENT_TIMER, 
    .transitions = timer_transitions, 
    .transitions_count = ARRAY_LEN(timer_transitions)},
 };

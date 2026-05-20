@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define AASM_EVENT(id, ...) \
-  { .event_id = (id), \
+#define AASM_EVENT(event_id, ...) \
+  { .id = (event_id), \
     .transitions = (AASM_Transition[]){ __VA_ARGS__ }, \
     .transitions_count = (sizeof((AASM_Transition[]){ __VA_ARGS__ }) / sizeof(AASM_Transition)) }
 
@@ -33,7 +33,7 @@ typedef struct {
 } AASM_Transition;
 
 typedef struct {
-  AASM_Event_ID event_id;
+  AASM_Event_ID id;
   const AASM_Transition *transitions;
   uint8_t transitions_count;
 } AASM_Event;
@@ -68,7 +68,7 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   // Let's find the event to fire!
   const AASM_Event *event = NULL;
   for (uint8_t i = 0; i < description->events_count; i++) {
-    if (description->events[i].event_id == event_id) {
+    if (description->events[i].id == event_id) {
       event = &description->events[i];
       break;
     }
