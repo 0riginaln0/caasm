@@ -4,13 +4,13 @@ A single-header library for allocation-free FSM definition with powerful DSL.
 
 Interactive demo examples:
 
-Run them with `gcc job2.c -o j2.exe && ./j2.exe`
+Run them with `gcc job.c -o j.exe && ./j.exe`
 
 - `job.c`: separate arrays for states, events, transitions. Begin with this example.
 - `job_inplace.c`: In‑place FSM definition using compound literals. (Check this one to compare with the next example)
 - `job_macros.c`: Fancy macros eliminating all boilerplate.
 
-All callbacks are optional. The order of calling the callbacks is documented in `caasm.h`.
+All callbacks are optional.
 
 The Ruby's original AASM Job code:
 ```ruby
@@ -80,9 +80,6 @@ static AASM_Runtime runtime = {
 };
 ```
 
-
-
-
 - AASM_Runtime
   - Fields:
     - States (array of states)
@@ -120,3 +117,26 @@ static AASM_Runtime runtime = {
   - Callbacks:
     - guards
     - after
+
+# Callback Execution Order
+
+The original library contains numerous callbacks. The AI ​​claims that all of them can be useful.
+
+| Callback / Step | Description | Notes |
+|----------------|-------------|-------|
+| `before_all_events` | Global hook before any event fires; useful for logging, metrics, or setup common to all events. | Runs regardless of which event is triggered. |
+| `event.before` | Event‑specific preparation logic before guards; useful for setting context or validation. | |
+| `event.guards` | Conditions that must pass for the event to proceed; e.g., user permissions, system status. | If false → abort, no state change. |
+| `transition.guards` | Transition‑specific conditions; e.g., business rules for a particular state change. | If false → abort. |
+| `old_state.before_exit` | Preparation before leaving the old state; validation or setup before cleanup. | |
+| `old_state.exit` | Actual exit action for the old state; resource cleanup, stopping timers, releasing locks. | |
+| `after_all_transitions` | Runs after transition logic but before state update; logging transition details (from/to). | |
+| `transition.after` | Transition‑specific logic after the transition; actions for this particular state change. | |
+| `new_state.before_enter` | Preparation before entering the new state; validation or setup before initialization. | |
+| `new_state.enter` | Actual enter action for the new state; resource acquisition, starting timers, acquiring locks. | |
+| **State Update** *(not a callback)* | **Actual state change occurs here.** The `current_state` is updated from old to new. | Critical point in the flow; happens between `new_state.enter` and `old_state.after_exit`. |
+| `old_state.after_exit` | Cleanup after leaving the old state, runs **after** the state update. |  |
+| `new_state.after_enter` | Cleanup after entering the new state, runs **after** the state update. |  |
+| `event.after` | Event‑specific cleanup after the transition completes; notifications or side effects. | |
+| `after_all_events` | Global cleanup hook after any event completes; final logging, metrics, or cleanup. | |
+
