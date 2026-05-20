@@ -1,6 +1,6 @@
 Experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
-A single-header library for allocation-free FSM definition with powerful DSL and callbacks system.
+A single-header library for allocation-free FSM definition with powerful DSL and a callbacks system.
 
 Interactive demo examples:
 
