@@ -1,6 +1,6 @@
 Experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
-A single-header library for allocation-free FSM definition with powerful DSL.
+A single-header library for allocation-free FSM definition with powerful DSL and callbacks system.
 
 Interactive demo examples:
 
@@ -10,7 +10,6 @@ Run them with `gcc job.c -o j.exe && ./j.exe`
 - `job_inplace.c`: In‑place FSM definition using compound literals. (Check this one to compare with the next example)
 - `job_macros.c`: Fancy macros eliminating all boilerplate.
 
-All callbacks are optional.
 
 The Ruby's original AASM Job code:
 ```ruby
@@ -79,6 +78,8 @@ static AASM_Runtime runtime = {
   )
 };
 ```
+
+All callbacks are optional.
 
 - AASM_Runtime
   - Fields:
