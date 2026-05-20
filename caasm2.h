@@ -74,7 +74,7 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err) {
   runtime->ctx = ctx;
 
   // TODO: Maybe some magic for a more optimized event dispatching
-  // can return false if no intial state found or several marked as such.
+
   int initial_states = 0;
   for (int i = 0; i < runtime->states_count; i++) {
     if (runtime->states[i].is_initial) initial_states++;

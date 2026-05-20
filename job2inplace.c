@@ -46,38 +46,39 @@ static int parse_event(const char* input, AASM_Event_ID* event) {
   return 0;
 }
 
-static const AASM_State fsm_states[] = {
-  { .id = STATE_SLEEPING, .is_initial = true },
-  { .id = STATE_RUNNING,  .is_initial = false },
-  { .id = STATE_CLEANING, .is_initial = false },
-};
-
-static const AASM_Transition run_transitions[] = {{
-    .from = (AASM_State_ID[]){STATE_SLEEPING},
-    .from_count = 1,
-    .to = STATE_RUNNING,
-}};
-
-static const AASM_Transition clean_transitions[] = {{
-  .from = (AASM_State_ID[]) { STATE_RUNNING }, .from_count = 1,
-  .to = STATE_CLEANING,
-}};
-
-static const AASM_Transition sleep_transitions[] = {{
-  .from = (AASM_State_ID[]) { STATE_RUNNING, STATE_CLEANING }, .from_count = 2,
-  .to = STATE_SLEEPING,
-}};
-
-static const AASM_Event fsm_events[] = {
-  { .id = EVENT_SLEEP, .transitions = sleep_transitions, .transitions_count = 1 },
-  { .id = EVENT_CLEAN, .transitions = clean_transitions, .transitions_count = 1 },
-  { .id = EVENT_RUN,   .transitions = run_transitions,   .transitions_count = 1 }
-};
-
 static AASM_Runtime runtime = {
-  .states = fsm_states,
+  .states = (AASM_State[]) {
+    { .id = STATE_SLEEPING, .is_initial = true },
+    { .id = STATE_RUNNING,  .is_initial = false },
+    { .id = STATE_CLEANING, .is_initial = false },
+  },
   .states_count = 3,
-  .events = fsm_events,
+  .events = (AASM_Event[]) {
+    { 
+      .id = EVENT_RUN,
+      .transitions = (AASM_Transition[]) {{
+        .from = (AASM_State_ID[]){STATE_SLEEPING}, .from_count = 1,
+        .to = STATE_RUNNING,
+      }},
+      .transitions_count = 1 
+    },
+    { 
+      .id = EVENT_CLEAN,
+      .transitions = (AASM_Transition[]) {{
+        .from = (AASM_State_ID[]) { STATE_RUNNING }, .from_count = 1,
+        .to = STATE_CLEANING,
+      }},
+      .transitions_count = 1 
+    },
+    { 
+      .id = EVENT_SLEEP,
+      .transitions = (AASM_Transition[]) {{
+        .from = (AASM_State_ID[]) { STATE_RUNNING, STATE_CLEANING }, .from_count = 2,
+        .to = STATE_SLEEPING,
+      }},
+      .transitions_count = 1 
+    },
+  },
   .events_count = 3,
 };
 
