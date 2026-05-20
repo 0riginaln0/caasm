@@ -4,8 +4,10 @@ A single-header library for allocation-free FSM definition with powerful DSL.
 
 Interactive demo examples:
 
+Run them with `gcc job2.c -o j2.exe && ./j2.exe`
+
 - `job.c`: separate arrays for states, events, transitions. Begin with this example.
-- `job_inplace.c`: In‑place FSM definition using compound literals. (Check this example to compare with the next example)
+- `job_inplace.c`: In‑place FSM definition using compound literals. (Check this one to compare with the next example)
 - `job_macros.c`: Fancy macros eliminating all boilerplate.
 
 All callbacks are optional. The order of calling the callbacks is documented in `caasm.h`.
