@@ -28,17 +28,17 @@ static const char* state_to_string(AASM_State_ID state) {
 
 static int parse_event(const char* input, AASM_Event_ID* event) {
   if (strcmp(input, "RUN") == 0 || strcmp(input, "run") == 0 ||
-      strcmp(input, "R") == 0 || strcmp(input, "r") == 0) {
+      strcmp(input, "R") == 0   || strcmp(input, "r") == 0) {
     *event = EVENT_RUN;
     return 1;
   }
   if (strcmp(input, "CLEAN") == 0 || strcmp(input, "clean") == 0 ||
-      strcmp(input, "C") == 0 || strcmp(input, "c") == 0) {
+      strcmp(input, "C") == 0     || strcmp(input, "c") == 0) {
     *event = EVENT_CLEAN;
     return 1;
   }
   if (strcmp(input, "SLEEP") == 0 || strcmp(input, "sleep") == 0 ||
-      strcmp(input, "S") == 0 || strcmp(input, "s") == 0) {
+      strcmp(input, "S") == 0     || strcmp(input, "s") == 0) {
     *event = EVENT_SLEEP;
     return 1;
   }
@@ -103,8 +103,8 @@ int main(void) {
     }
 
     line[strcspn(line, "\n")] = '\0';
-    if (strcmp(line, "quit") == 0 || strcmp(line, "q") == 0 ||
-        strcmp(line, "exit") == 0 || strcmp(line, "e") == 0) {
+    if (strcmp(line, "quit") == 0 || strcmp(line, "exit") == 0 ||
+        strcmp(line, "q") == 0    || strcmp(line, "e") == 0) {
       printf("Exiting.\n");
       break;
     }
