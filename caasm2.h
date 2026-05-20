@@ -146,7 +146,7 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   void *ctx = runtime->ctx;
 
   // 1. Runtime-level: before_all_events
-  runtime->before_all_events(ctx);
+  if (runtime->before_all_events) runtime->before_all_events(ctx);
 
   // Let's find the event to fire!
   const AASM_Event *event = NULL;
