@@ -5,11 +5,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define AASM_EVENT(event_id, ...) \
-  { .id = (event_id), \
-    .transitions = (AASM_Transition[]){ __VA_ARGS__ }, \
-    .transitions_count = (sizeof((AASM_Transition[]){ __VA_ARGS__ }) / sizeof(AASM_Transition)) }
-
+// #define AASM_EVENT(event_id, ...) \
+//   { .id = (event_id), \
+//     .transitions = (AASM_Transition[]){ __VA_ARGS__ }, \
+//     .transitions_count = (sizeof((AASM_Transition[]){ __VA_ARGS__ }) / sizeof(AASM_Transition)) }
 
 typedef uint8_t AASM_State_ID;
 typedef uint8_t AASM_Event_ID;
