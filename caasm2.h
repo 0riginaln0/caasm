@@ -204,7 +204,6 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   // 7. Runtime-level: after_all_transitions
   if (runtime->after_all_transitions) runtime->after_all_transitions(ctx);
 
-
   // 8. Transition-level: after
   if (transition->after) transition->after(ctx);
 
