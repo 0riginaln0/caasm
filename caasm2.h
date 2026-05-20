@@ -64,20 +64,34 @@ typedef struct {
   void          *ctx;
 } AASM_Runtime;
 
-bool aasm_init(AASM_Runtime *runtime, void *ctx);
+bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err);
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
-
 
 #ifdef AASM_IMPLEMENTATION
 
-bool aasm_init(AASM_Runtime *runtime, void *ctx) {
+bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err) {
   runtime->ctx = ctx;
+
   // TODO: Maybe some magic for a more optimized event dispatching
-  // can return false if no intial state found
+  // can return false if no intial state found or several marked as such.
+  int initial_states = 0;
+  for (int i = 0; i < runtime->states_count; i++) {
+    if (runtime->states[i].is_initial) initial_states++;
+  }
+  if (initial_states != 1) {
+    if (initial_states == 0) {
+      *err = "Your FSM does not have an initial state";
+    } else {
+      *err = "Your FSM has several initial states";
+    }
+    return false;
+  }
+
+  return true;
 }
 
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
-  const AASM_Description *description = runtime->description;
+
 
   // Let's find the event to fire!
   const AASM_Event *event = NULL;
