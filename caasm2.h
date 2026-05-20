@@ -70,9 +70,10 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
 
 #ifdef AASM_IMPLEMENTATION
 
-void aasm_init(AASM_Runtime *runtime, const AASM_Description *description, void *ctx) {
+bool aasm_init(AASM_Runtime *runtime, void *ctx) {
   runtime->ctx = ctx;
   // TODO: Maybe some magic for a more optimized event dispatching
+  // can return false if no intial state found
 }
 
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
