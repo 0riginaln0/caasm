@@ -18,11 +18,7 @@ typedef uint8_t AASM_State_ID;
 typedef uint8_t AASM_Event_ID;
 
 // TODO: replacable bool type
-
-// Returns true when transition is allowed
 typedef bool (*AASM_Guard_Callback)(void *ctx);
-
-// Action to call after transition
 typedef void (*AASM_Action_Callback)(void *ctx);
 
 typedef struct {
