@@ -161,12 +161,14 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
  found_event:
 
   // 2. Event-level: before
-  event->before(ctx);
+  if (event->before) event->before(ctx);
 
   // 3. Event-level: guards
-  bool event_guards_passed = false;
-  event_guards_passed = event->guard(ctx);
-  if (!event_guards_passed) return false;
+  if (event->guard) {
+    bool event_guards_passed = false;
+    event_guards_passed = event->guard(ctx);
+    if (!event_guards_passed) return false;
+  }
 
   // Is there even a transition for the event from the current state?
   const AASM_Transition *transition = NULL;
@@ -184,9 +186,11 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
  found_transition:
 
   // 4. Transition-level: guards (for the matching transition)
-  bool transition_guards_passed = false;
-  transition_guards_passed = transition->guard(ctx);
-  if (!transition_guards_passed) return false;
+  if (transition->guard) {
+    bool transition_guards_passed = false;
+    transition_guards_passed = transition->guard(ctx);
+    if (!transition_guards_passed) return false;
+  }
 
   // 5. Old state: before_exit
   const AASM_State *old_state = NULL;
