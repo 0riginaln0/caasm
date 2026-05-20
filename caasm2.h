@@ -18,8 +18,8 @@ typedef void (*AASM_Callback)(void *ctx);
 
 typedef struct {
   const AASM_State_ID *from;
-  uint8_t             from_count;
-  AASM_State_ID       to;
+  uint8_t              from_count;
+  AASM_State_ID        to;
 
   AASM_Guard_Callback guards;
   AASM_Callback       after;
@@ -27,9 +27,9 @@ typedef struct {
 } AASM_Transition;
 
 typedef struct {
-  AASM_Event_ID         id;
+  AASM_Event_ID          id;
   const AASM_Transition *transitions;
-  uint8_t               transitions_count;
+  uint8_t                transitions_count;
 
   AASM_Guard_Callback guards;
   AASM_Callback       before;
@@ -51,16 +51,16 @@ typedef struct {
 } AASM_State;
 
 typedef struct {
-  const AASM_State   *states;
-  uint8_t            states_count;
-  const AASM_Event   *events;
-  uint8_t            events_count;
+  const AASM_State *states;
+  uint8_t           states_count;
+  const AASM_Event *events;
+  uint8_t           events_count;
 
   AASM_Callback before_all_events;
   AASM_Callback after_all_transitions;
   AASM_Callback after_all_events;
 
-  AASM_State_ID current_state;
+  AASM_State_ID  current_state;
   void          *ctx;
 } AASM_Runtime;
 
