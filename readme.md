@@ -30,8 +30,6 @@ examples/job.c - fancy macros eliminating boilerplate, interactive demo for send
   - Callbacks:
     - before
     - guards
-    - before_success
-    - success
     - after
 - AASM_Transition
   - Fields:
@@ -40,7 +38,6 @@ examples/job.c - fancy macros eliminating boilerplate, interactive demo for send
   - Callbacks:
     - guards
     - after
-    - success
 
 ```ruby
 aasm do
