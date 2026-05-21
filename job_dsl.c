@@ -9,7 +9,7 @@
 #define RESET  "\033[0m"
 
 #define AASM_IMPLEMENTATION
-#include "caasm.h"
+#include "caasm_dsl.h"
 
 enum State {
   STATE_SLEEPING,
@@ -155,39 +155,29 @@ void log_run_time(void *ctx) {
 
 static AASM_Runtime runtime = {
   AASM_STATES(
-    AASM_STATE(STATE_SLEEPING, .is_initial = true,
-               AASM_BEFORE_ENTER(do_something)),
-    AASM_STATE(STATE_RUNNING,
-               AASM_BEFORE_ENTER(state_running_before_enter)),
-    AASM_STATE(STATE_CLEANING,
-               AASM_BEFORE_ENTER(state_cleaning_before_enter)),
+    INITIAL_STATE(SLEEPING, BEFORE_ENTER(do_something)),
+
+    STATE(RUNNING, BEFORE_ENTER(state_running_before_enter)),
+
+    STATE(CLEANING, BEFORE_ENTER(state_cleaning_before_enter))
   ),
 
+  
   AASM_EVENTS(
-    AASM_EVENT(EVENT_RUN, AASM_BEFORE(event_run_before), AASM_AFTER(notify_somebody),
-      AASM_TRANSITIONS({
-        AASM_FROM(STATE_SLEEPING), .to = STATE_RUNNING,
-        AASM_AFTER(transition_after_run)
-      })
-    ),
-
-    AASM_EVENT(EVENT_CLEAN,
-      AASM_TRANSITIONS({
-        AASM_FROM(STATE_RUNNING), .to = STATE_CLEANING,
-        AASM_AFTER(log_run_time)
-      })
-    ),
-
-    AASM_EVENT(EVENT_SLEEP, AASM_AFTER(event_sleep_after),
-      AASM_TRANSITIONS({
-        AASM_FROM(STATE_RUNNING, STATE_CLEANING), .to = STATE_SLEEPING
-      })
-    )
+    EVENT(RUN, BEFORE(event_run_before), AFTER(notify_somebody),
+      TRANSITIONS({FROM(SLEEPING), TO(RUNNING), AFTER(transition_after_run)})),
+    
+    EVENT(CLEAN,
+      TRANSITIONS({FROM(RUNNING), TO(CLEANING), AFTER(log_run_time)})),
+    
+    EVENT(SLEEP,
+      AFTER(event_sleep_after),
+      TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})),
   ),
-
+  
   .after_all_transitions = log_status_change,
   .before_all_events = before_all_events,
-  .after_all_events = after_all_events,
+  .after_all_events = after_all_events
 };
 
 int main(void) {
