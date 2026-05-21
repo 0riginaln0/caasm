@@ -6,9 +6,10 @@ Interactive demo examples:
 
 Run them with `gcc job.c -o j.exe && ./j.exe`
 
-- `job.c`: separate arrays for states, events, transitions. Begin with this example.
+- `job.c`: Separate arrays for states, events, transitions. Begin with this example.
 - `job_inplace.c`: In‑place FSM definition using compound literals. (Check this one to compare with the next example)
 - `job_macros.c`: Fancy macros eliminating all boilerplate.
+- `job_callbacks.c`: Sketch of using callbacks with a state machine.
 
 
 The Ruby's original AASM Job code:
