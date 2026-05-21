@@ -8,8 +8,9 @@
 #define YELLOW "\033[33m"
 #define RESET  "\033[0m"
 
+#define AASM_PRETTIER_MACROS
 #define AASM_IMPLEMENTATION
-#include "caasm_dsl.h"
+#include "caasm.h"
 
 enum State {
   STATE_SLEEPING,
@@ -161,10 +162,10 @@ static AASM_Runtime runtime = {
 
     STATE(CLEANING, BEFORE_ENTER(state_cleaning_before_enter))
   ),
-
   
   AASM_EVENTS(
-    EVENT(RUN, BEFORE(event_run_before), AFTER(notify_somebody),
+    EVENT(RUN, 
+      BEFORE(event_run_before), AFTER(notify_somebody),
       TRANSITIONS({FROM(SLEEPING), TO(RUNNING), AFTER(transition_after_run)})),
     
     EVENT(CLEAN,

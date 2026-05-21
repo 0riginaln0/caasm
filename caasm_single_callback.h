@@ -5,24 +5,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define AASM_STATES(...) \
-  .states = (AASM_State[]){ __VA_ARGS__ }, \
-  .states_count = (sizeof((AASM_State[]){ __VA_ARGS__ }) / sizeof(AASM_State))
-
-#define AASM_EVENTS(...) \
-  .events = (AASM_Event[]){ __VA_ARGS__ }, \
-  .events_count = (sizeof((AASM_Event[]){ __VA_ARGS__ }) / sizeof(AASM_Event))
-
-#define AASM_TRANSITIONS(...) \
-  .transitions = (AASM_Transition[]){ __VA_ARGS__ }, \
-  .transitions_count = (sizeof((AASM_Transition[]){ __VA_ARGS__ }) / sizeof(AASM_Transition))
-
-#define AASM_FROM(...) \
-  .from = (AASM_State_ID[]){ __VA_ARGS__ }, \
-  .from_count = (sizeof((AASM_State_ID[]){ __VA_ARGS__ }) / sizeof(AASM_State_ID))
-
-#define AASM_STATE(state_id, ...)   { .id = (state_id), __VA_ARGS__ }
-#define AASM_EVENT(event_id, ...)   { .id = (event_id), __VA_ARGS__ }
 
 typedef uint8_t AASM_State_ID;
 typedef uint8_t AASM_Event_ID;
@@ -35,7 +17,6 @@ typedef struct {
   uint8_t              from_count;
   AASM_State_ID        to;
 
-  // TODO: These fields should be arrays of callbacks, not a single callback
   AASM_Guard_Callback guard;
   AASM_Callback       after;
 } AASM_Transition;
@@ -45,7 +26,6 @@ typedef struct {
   const AASM_Transition *transitions;
   uint8_t                transitions_count;
 
-  // TODO: These fields should be arrays of callbacks, not a single callback
   AASM_Guard_Callback guard;
   AASM_Callback       before;
   AASM_Callback       after;
@@ -55,7 +35,6 @@ typedef struct {
   AASM_State_ID id;
   bool          is_initial;
 
-  // TODO: These fields should be arrays of callbacks, not a single callback
   AASM_Callback before_enter;
   AASM_Callback enter;
   AASM_Callback after_enter;
@@ -70,7 +49,6 @@ typedef struct {
   const AASM_Event *events;
   uint8_t           events_count;
 
-  // These one must only accept one callback per each. Not an array of callbacks.
   AASM_Callback before_all_events;
   AASM_Callback after_all_transitions;
   AASM_Callback after_all_events;
@@ -84,6 +62,13 @@ typedef struct {
 
 bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err);
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
+
+#define AASM_SINGLE_CALLBACK
+#ifdef AASM_PRETTIER_MACROS
+#  include "caasm_prettier_macros.h"
+#else
+#  include "caasm_macros.h"
+#endif
 
 #ifdef AASM_IMPLEMENTATION
 

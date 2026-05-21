@@ -2,10 +2,11 @@ Experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
 A single-header library for FSM definition with powerful DSL and a callbacks system.
 
-Versions:
+Files:
 - `caasm.h` - allows multiple callbacks per slot.
 - `caasm_single_callback.h` - allows only one callback per slot.
-- `caasm_dsl.h` - prettier macros.
+- `caasm_macros.h` - macros for eliminating the boilerplate.
+- `caasm_prettier_macros.h` - even more prettier macros for eliminating even more boilerplate.
 
 Interactive demo examples:
 
@@ -15,8 +16,7 @@ Run them with `gcc job.c -o j.exe && ./j.exe`
 - `job_inplace.c`: In‑place FSM definition using compound literals. (Check this one to compare with the next example)
 - `job_macros.c`: Fancy macros eliminating all boilerplate.
 - `job_callbacks.c`: Sketch of using callbacks with a state machine.
-- `job_dsl.c`: even fancier macros.
-
+- `job_prettier_macros.c`: Previous example using prettier macros.
 
 The Ruby's original AASM Job code:
 ```ruby
