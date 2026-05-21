@@ -158,31 +158,31 @@ void log_run_time(void *ctx) {
 static AASM_Runtime runtime = {
   AASM_STATES(
     AASM_STATE(STATE_SLEEPING, .is_initial = true,
-               .before_enter = do_something),
+               AASM_BEFORE_ENTER(do_something)),
     AASM_STATE(STATE_RUNNING,
-               .before_enter = state_running_before_enter),
+               AASM_BEFORE_ENTER(state_running_before_enter)),
     AASM_STATE(STATE_CLEANING,
-               .before_enter = state_cleaning_before_enter),
+               AASM_BEFORE_ENTER(state_cleaning_before_enter)),
   ),
   
   .after_all_transitions = log_status_change,
 
   AASM_EVENTS(
-    AASM_EVENT(EVENT_RUN, .before = event_run_before, .after = notify_somebody,
+    AASM_EVENT(EVENT_RUN, AASM_BEFORE(event_run_before), AASM_AFTER(notify_somebody),
       AASM_TRANSITIONS({
         AASM_FROM(STATE_SLEEPING), .to = STATE_RUNNING,
-        .after = transition_after_run
+        AASM_AFTER(transition_after_run)
       })
     ),
 
     AASM_EVENT(EVENT_CLEAN,
       AASM_TRANSITIONS({
         AASM_FROM(STATE_RUNNING), .to = STATE_CLEANING,
-        .after = log_run_time
+        AASM_AFTER(log_run_time)
       })
     ),
 
-    AASM_EVENT(EVENT_SLEEP, .after = event_sleep_after,
+    AASM_EVENT(EVENT_SLEEP, AASM_AFTER(event_sleep_after),
       AASM_TRANSITIONS({
         AASM_FROM(STATE_RUNNING, STATE_CLEANING), .to = STATE_SLEEPING
       })
