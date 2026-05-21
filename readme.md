@@ -5,6 +5,7 @@ A single-header library for FSM definition with powerful DSL and a callbacks sys
 Versions:
 - `caasm.h` - allows multiple callbacks per slot.
 - `caasm_single_callback.h` - allows only one callback per slot.
+- `caasm_dsl.h` - prettier macros.
 
 Interactive demo examples:
 
