@@ -15,6 +15,7 @@ Run them with `gcc job.c -o j.exe && ./j.exe`
 - `job_inplace.c`: In‑place FSM definition using compound literals. (Check this one to compare with the next example)
 - `job_macros.c`: Fancy macros eliminating all boilerplate.
 - `job_callbacks.c`: Sketch of using callbacks with a state machine.
+- `job_dsl.c`: even fancier macros.
 
 
 The Ruby's original AASM Job code:
