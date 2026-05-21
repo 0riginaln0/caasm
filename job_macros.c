@@ -88,7 +88,7 @@ int main(void) {
   }
   printf("Your FSM is fine.\n");
 
-  printf("Available events: (r)un, (c)lean, (s)leap (type (q)uit to exit)\n\n");
+  printf("Available events: (r)un, (c)lean, (s)leep (type (q)uit to exit)\n\n");
 
   char line[100];
   while (1) {
@@ -110,7 +110,7 @@ int main(void) {
     AASM_Event_ID ev;
     if (!parse_event(line, &ev)) {
       printf(YELLOW"Unknown event: '%s'.\n"RESET
-             "Please enter (r)un, (c)lean, (s)leap (type (q)uit to exit)\n\n", line);
+             "Please enter (r)un, (c)lean, (s)leep (type (q)uit to exit)\n\n", line);
       continue;
     }
 

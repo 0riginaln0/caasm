@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>      // for timing example
+#include <stdlib.h>    // for malloc/free (if needed)
 
 #define AASM_IMPLEMENTATION
 #include "caasm.h"
@@ -9,6 +11,7 @@
 #define GREEN  "\033[32m"
 #define YELLOW "\033[33m"
 #define RESET  "\033[0m"
+
 
 enum State {
   STATE_SLEEPING,
@@ -22,12 +25,29 @@ enum Event {
   EVENT_SLEEP,
 };
 
+typedef struct JobContext {
+  AASM_Runtime *runtime;
+  char job_name[64];       // job identifier
+  char process_name[64];   // name of the current process (for set_process)
+  time_t start_time;       // when the job entered RUNNING state
+  int run_count;           // number of times the job has been run
+  int clean_count;         // number of cleaning cycles
+} JobContext;
+
 static const char* state_to_string(AASM_State_ID state) {
   switch (state) {
     case STATE_SLEEPING: return "SLEEPING";
     case STATE_RUNNING:  return "RUNNING";
     case STATE_CLEANING: return "CLEANING";
     default:             return "UNKNOWN";
+  }
+}
+static const char* event_to_string(AASM_Event_ID state) {
+  switch (state) {
+    case EVENT_RUN:   return "RUN";
+    case EVENT_CLEAN: return "CLEAN";
+    case EVENT_SLEEP: return "SLEEP";
+    default:          return "UNKNOWN";
   }
 }
 
@@ -47,65 +67,152 @@ static int parse_event(const char* input, AASM_Event_ID* event) {
     *event = EVENT_SLEEP;
     return 1;
   }
-
   return 0;
 }
 
-void printf_before_all_events(void *ctx) {
-  (void)ctx;
-  printf("I run before all events\n");
+void before_all_events(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  printf("  [%s] I run before all events\n", job->job_name);
 }
-void printf_after_all_events(void *ctx) {
-  (void)ctx;
-  printf("I run after all events\n");
+
+void after_all_events(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  printf("  [%s] I run after all events\n", job->job_name);
 }
-void printf_after_all_transitions(void *ctx) {
-  (void)ctx;
-  printf("I run after all transitions\n");
+
+void log_status_change(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  AASM_Runtime *rt = job->runtime;
+
+  const char *from = state_to_string(rt->from_state);
+  const char *to   = state_to_string(rt->to_state);
+  printf("  [%s] changing from %s to %s (event: %s)\n",
+         job->job_name, from, to, event_to_string(rt->current_event));
+}
+
+void do_something(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  printf("  [%s] do_something: Preparing state...\n", job->job_name);
+}
+
+void notify_somebody(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  printf("  [%s] notify_somebody: Sending notification...\n", job->job_name);
+}
+
+void state_running_before_enter(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  do_something(ctx);
+  notify_somebody(ctx);
+  job->start_time = time(NULL);
+  job->run_count++;
+  char time_buf[9];
+  struct tm *tm_info = localtime(&job->start_time);
+  strftime(time_buf, sizeof(time_buf), "%H:%M:%S", tm_info);
+  printf("  [%s] Entered RUNNING state at %s (run #%d)\n",
+         job->job_name, time_buf, job->run_count);
+}
+
+void state_cleaning_before_enter(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  job->clean_count++;
+  printf("  [%s] Entered CLEANING state (clean #%d)\n",
+          job->job_name, job->clean_count);
+}
+
+void event_run_before(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  printf("  [%s] Preparing to run\n", job->job_name);
+}
+
+void event_sleep_after(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  printf("  [%s] Entering sleep mode (cleaning count: %d)\n",
+         job->job_name, job->clean_count);
+}
+
+void set_process(void *ctx, const char *name) {
+  JobContext *job = (JobContext*)ctx;
+  strncpy(job->process_name, name, sizeof(job->process_name) - 1);
+  job->process_name[sizeof(job->process_name)-1] = '\0';
+  printf("  [%s] set_process: Starting process '%s'\n", job->job_name, job->process_name);
+}
+
+void transition_after_run(void *ctx) {
+  // In a real app, you would retrieve argument from context or from a queue.
+  // Here we pass a fixed string, but you could store an argument in JobContext.
+  set_process(ctx, "my_job");
+}
+
+void log_run_time(void *ctx) {
+  JobContext *job = (JobContext*)ctx;
+  if (job->start_time != 0) {
+    time_t now = time(NULL);
+    double seconds = difftime(now, job->start_time);
+    printf("  [%s] Job was running for %.0f seconds\n", job->job_name, seconds);
+  } else {
+    printf("  [%s] Job runtime unknown (start time not set)\n", job->job_name);
+  }
 }
 
 static AASM_Runtime runtime = {
   AASM_STATES(
-    AASM_STATE(STATE_SLEEPING, .is_initial = true),
-    AASM_STATE(STATE_RUNNING),
-    AASM_STATE(STATE_CLEANING)
+    AASM_STATE(STATE_SLEEPING, .is_initial = true,
+               .before_enter = do_something),
+    AASM_STATE(STATE_RUNNING,
+               .before_enter = state_running_before_enter),
+    AASM_STATE(STATE_CLEANING,
+               .before_enter = state_cleaning_before_enter),
   ),
+  
+  .after_all_transitions = log_status_change,
 
   AASM_EVENTS(
-    AASM_EVENT(EVENT_RUN,
+    AASM_EVENT(EVENT_RUN, .before = event_run_before, .after = notify_somebody,
       AASM_TRANSITIONS({
-        AASM_FROM(STATE_SLEEPING), .to = STATE_RUNNING
+        AASM_FROM(STATE_SLEEPING), .to = STATE_RUNNING,
+        .after = transition_after_run
       })
     ),
-    
+
     AASM_EVENT(EVENT_CLEAN,
       AASM_TRANSITIONS({
-        AASM_FROM(STATE_RUNNING), .to = STATE_CLEANING
+        AASM_FROM(STATE_RUNNING), .to = STATE_CLEANING,
+        .after = log_run_time
       })
     ),
-    
-    AASM_EVENT(EVENT_SLEEP,
+
+    AASM_EVENT(EVENT_SLEEP, .after = event_sleep_after,
       AASM_TRANSITIONS({
         AASM_FROM(STATE_RUNNING, STATE_CLEANING), .to = STATE_SLEEPING
       })
     )
   ),
-  .before_all_events = printf_before_all_events,
-  .after_all_events = printf_after_all_events,
-  .after_all_transitions = printf_after_all_transitions,
+
+  .before_all_events = before_all_events,
+  .after_all_events = after_all_events,
 };
 
 int main(void) {
   const char *err = NULL;
 
-  bool ok = aasm_init(&runtime, NULL, &err);
+  JobContext job_ctx = {
+    .runtime = &runtime,
+    .job_name = "MyJob",
+    .process_name = "",
+    .start_time = 0,
+    .run_count = 0,
+    .clean_count = 0
+  };
+
+  bool ok = aasm_init(&runtime, &job_ctx, &err);
   if (!ok) {
     printf("Error with your FSM: %s\n", err);
     return 1;
   }
   printf("Your FSM is fine.\n");
 
-  printf("Available events: (r)un, (c)lean, (s)leap (type (q)uit to exit)\n\n");
+  printf("Available events: (r)un, (c)lean, (s)leep (type (q)uit to exit)\n\n");
 
   char line[100];
   while (1) {
@@ -127,7 +234,7 @@ int main(void) {
     AASM_Event_ID ev;
     if (!parse_event(line, &ev)) {
       printf(YELLOW"Unknown event: '%s'.\n"RESET
-             "Please enter (r)un, (c)lean, (s)leap (type (q)uit to exit)\n\n", line);
+             "Please enter (r)un, (c)lean, (s)leep (type (q)uit to exit)\n\n", line);
       continue;
     }
 

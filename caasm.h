@@ -75,7 +75,10 @@ typedef struct {
   AASM_Callback after_all_transitions;
   AASM_Callback after_all_events;
 
-  AASM_State_ID  current_state;
+  AASM_State_ID current_state;
+  AASM_State_ID from_state;
+  AASM_State_ID to_state;
+  AASM_State_ID current_event;
   void          *ctx;
 } AASM_Runtime;
 
@@ -159,6 +162,8 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err) {
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   void *ctx = runtime->ctx;
 
+  runtime->current_event = event_id;
+
   // 1. Runtime-level: before_all_events
   if (runtime->before_all_events) runtime->before_all_events(ctx);
 
@@ -218,6 +223,9 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
 
   // 6. Old state: exit
   if (old_state->exit) old_state->exit(ctx);
+
+  runtime->from_state = runtime->current_state;
+  runtime->to_state = transition->to;
 
   // 7. Runtime-level: after_all_transitions
   if (runtime->after_all_transitions) runtime->after_all_transitions(ctx);
