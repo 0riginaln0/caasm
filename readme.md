@@ -2,6 +2,10 @@ Experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
 A single-header library for FSM definition with powerful DSL and a callbacks system.
 
+Versions:
+- `caasm.h` - allows multiple callbacks per slot.
+- `caasm_single_callback.h` - allows only one callback per slot.
+
 Interactive demo examples:
 
 Run them with `gcc job.c -o j.exe && ./j.exe`
