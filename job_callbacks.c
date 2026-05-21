@@ -1,8 +1,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
-#include <time.h>      // for timing example
-#include <stdlib.h>    // for malloc/free (if needed)
+#include <time.h>
 
 #define AASM_IMPLEMENTATION
 #include "caasm.h"
