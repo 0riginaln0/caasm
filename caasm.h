@@ -60,7 +60,7 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
 
 #ifdef AASM_PRETTIER_MACROS
 #  include "caasm_prettier_macros.h"
-#else
+#elif defined(AASM_USE_MACROS)
 #  include "caasm_macros.h"
 #endif
 

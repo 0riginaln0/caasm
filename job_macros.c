@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#define AASM_USE_MACROS
 #define AASM_IMPLEMENTATION
 #include "caasm.h"
 

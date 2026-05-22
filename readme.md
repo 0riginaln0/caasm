@@ -8,6 +8,7 @@ Files:
 - `caasm_optimized.h` - O(1) states, events and transitions lookup instead of linear. (With the caveat for the transitions lookup: there can be only one transtion defined to respond to a particular event from a particular state)
 - `caasm_macros.h` - macros for eliminating the boilerplate.
 - `caasm_prettier_macros.h` - even more prettier macros for eliminating even more boilerplate.
+- `caasm_scoped_macros.h` - same as the previous one, but made in a way that don't pollute globals.
 
 Interactive demo examples:
 
@@ -19,6 +20,7 @@ Run them with `gcc job.c -o j.exe && ./j.exe`
 - `job_callbacks.c`: Sketch of using callbacks with a state machine.
 - `job_prettier_macros.c`: Previous example using prettier macros.
 - `job_optimized.c`: O(1) states, events and transitions lookup.
+- `job_scoped.c`: usage of the scoped macros.
 
 The Ruby's original AASM Job code:
 ```ruby
