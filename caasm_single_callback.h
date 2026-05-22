@@ -70,7 +70,7 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
 #  include "caasm_macros.h"
 #endif
 
-#ifdef AASM_IMPLEMENTATION
+// #ifdef AASM_IMPLEMENTATION
 
 bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err) {
   runtime->ctx = ctx;
@@ -79,7 +79,10 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err) {
 
   int initial_states = 0;
   for (int i = 0; i < runtime->states_count; i++) {
-    if (runtime->states[i].is_initial) initial_states++;
+    if (runtime->states[i].is_initial) {
+      initial_states++;
+      runtime->current_state = runtime->states[i].id;
+    }
   }
   if (initial_states != 1) {
     if (initial_states == 0) {
@@ -249,5 +252,5 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   return true;
 }
 
-#endif
+// #endif
 #endif

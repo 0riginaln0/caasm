@@ -53,9 +53,19 @@ typedef struct {
   AASM_State_ID to_state;
   AASM_State_ID current_event;
   void          *ctx;
+
+  
+  const AASM_State * const * state_table; // [state_id] -> state*
+  const AASM_Event * const * event_table; // [event_id] -> event*
+  const AASM_Transition * const * transition_table; // [state_id * events_count + event_id]
+                                                    // -> transition*
 } AASM_Runtime;
 
-bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err);
+bool aasm_init(AASM_Runtime *runtime, void *ctx,
+               const AASM_State **state_table, int state_table_size,
+               const AASM_Event **event_table, int event_table_size,
+               const AASM_Transition **transition_table, int transition_table_size,
+               char **err);
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
 
 #ifdef AASM_PRETTIER_MACROS
@@ -66,10 +76,15 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
 
 #ifdef AASM_IMPLEMENTATION
 
-bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err) {
+bool aasm_init(AASM_Runtime *runtime, void *ctx,
+               const AASM_State **state_table, int state_table_size,
+               const AASM_Event **event_table, int event_table_size,
+               const AASM_Transition **transition_table, int transition_table_size,
+               char **err) {
   runtime->ctx = ctx;
-
-  // TODO: Maybe some magic for a more optimized event dispatching
+  runtime->state_table = state_table;
+  runtime->event_table = event_table;
+  runtime->transition_table = transition_table;
 
   int initial_states = 0;
   for (int i = 0; i < runtime->states_count; i++) {
@@ -85,6 +100,50 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx, const char **err) {
       *err = "Your FSM has several initial states";
     }
     return false;
+  }
+
+  // Some magic for a more optimized event dispatching
+  for (int i = 0; i < state_table_size; i++) state_table[i] = NULL;
+  for (int i = 0; i < event_table_size; i++) event_table[i] = NULL;
+  for (int i = 0; i < transition_table_size; i++) transition_table[i] = NULL;
+  
+  if (runtime->states_count != state_table_size) {
+    *err = "State table size mismatch";
+    return false;
+  }
+  if (runtime->events_count != event_table_size) {
+    *err = "Event table size mismatch";
+    return false;
+  }
+  
+  for (int i = 0; i < runtime->states_count; i++) {
+    const AASM_State *s = &runtime->states[i];
+    if (s->id >= state_table_size) {
+      *err = "State ID exceeds state table size";
+      return false;
+    }
+    state_table[s->id] = s;
+  }
+  for (int e = 0; e < runtime->events_count; e++) {
+    const AASM_Event *ev = &runtime->events[e];
+    if (ev->id >= event_table_size) {
+      *err = "Event ID exceeds event table size";
+      return false;
+    }
+    event_table[ev->id] = ev;
+
+    for (int t = 0; t < ev->transitions_count; t++) {
+      const AASM_Transition *tr = &ev->transitions[t];
+      for (int f = 0; f < tr->from_count; f++) {
+        int from_state = tr->from[f];
+        int idx = from_state * event_table_size + ev->id;
+        if (idx >= transition_table_size) {
+          *err = "Transition index exceeds transition table size";
+          return false;
+        }
+        transition_table[idx] = tr;
+      }
+    }
   }
 
   // Init to NULL all non-existing callbacks. though, maybe they are already...
@@ -150,16 +209,8 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   if (runtime->before_all_events) runtime->before_all_events(ctx); // DO NOT EDIT
 
   // Let's find the event to fire!
-  const AASM_Event *event = NULL;
-  for (int i = 0; i < runtime->events_count; i++) {
-    if (runtime->events[i].id == event_id) {
-      event = &runtime->events[i];
-      goto found_event;
-    }
-  }
-  return false;
-
- found_event:
+  const AASM_Event *event = runtime->event_table[event_id];
+  if (!event) return false;
 
   // 2. Event-level: before
   if (event->before) {
@@ -176,19 +227,9 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   }
 
   // Is there even a transition for the event from the current state?
-  const AASM_Transition *transition = NULL;
-  for (int i = 0; i < event->transitions_count; i++) {
-    const AASM_Transition *temp_transition = &event->transitions[i];
-    for (int i = 0; i < temp_transition->from_count; i++) {
-      if (temp_transition->from[i] == runtime->current_state) {
-        transition = temp_transition;
-        goto found_transition;
-      }
-    }
-  }
-  return false;
-
- found_transition:
+  int transition_idx = runtime->current_state * runtime->events_count + event_id;
+  const AASM_Transition *transition = runtime->transition_table[transition_idx];
+  if (!transition) return false;
 
   // 4. Transition-level: guards (for the matching transition)
   if (transition->guards) {
@@ -198,13 +239,8 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   }
 
   // 5. Old state: before_exit
-  const AASM_State *old_state = NULL;
-  for (int i = 0; i < runtime->states_count; i++) {
-    if (runtime->current_state == runtime->states[i].id) {
-      old_state = &runtime->states[i];
-      break;
-    }
-  }
+  const AASM_State *old_state = runtime->state_table[runtime->current_state];
+
   if (old_state->before_exit) {
     for (int i = 0; i < old_state->before_exit_count; i++) {
       old_state->before_exit[i](ctx);
@@ -232,13 +268,8 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   }
 
   // 9. New state: before_enter
-  const AASM_State *new_state = NULL;
-  for (int i = 0; i < runtime->states_count; i++) {
-    if (transition->to == runtime->states[i].id) {
-      new_state = &runtime->states[i];
-      break;
-    }
-  }
+  const AASM_State *new_state = runtime->state_table[transition->to];
+
   if (new_state->before_enter) {
     for (int i = 0; i < new_state->before_enter_count; i++) {
       new_state->before_enter[i](ctx);

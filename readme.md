@@ -5,6 +5,7 @@ A single-header (spirituality) library for FSM definition with powerful DSL and 
 Files:
 - `caasm.h` - allows multiple callbacks per slot.
 - `caasm_single_callback.h` - allows only one callback per slot.
+- `caasm_optimized.h` - O(1) states, events and transitions lookup instead of linear. (With the caveat for the transitions lookup: there can be only one transtion defined to respond to a particular event from the a particular state)
 - `caasm_macros.h` - macros for eliminating the boilerplate.
 - `caasm_prettier_macros.h` - even more prettier macros for eliminating even more boilerplate.
 
@@ -17,6 +18,7 @@ Run them with `gcc job.c -o j.exe && ./j.exe`
 - `job_macros.c`: Fancy macros eliminating all boilerplate.
 - `job_callbacks.c`: Sketch of using callbacks with a state machine.
 - `job_prettier_macros.c`: Previous example using prettier macros.
+- `job_optimized.c`: O(1) states, events and transitions lookup.
 
 The Ruby's original AASM Job code:
 ```ruby
