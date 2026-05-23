@@ -81,7 +81,6 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
                char **err);
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
 
-#define AASM_IMPLEMENTATION
 #ifdef AASM_IMPLEMENTATION
 
 /// @brief Initializes the FSM runtime.
