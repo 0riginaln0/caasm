@@ -52,6 +52,8 @@ end
 
 The C AASM Job code:
 ```c
+#include "caasm.h"
+
 enum State {
   STATE_SLEEPING,
   STATE_RUNNING,
