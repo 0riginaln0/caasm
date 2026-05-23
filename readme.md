@@ -1,6 +1,6 @@
-Experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
+[cAASM](https://github.com/0riginaln0/caasm) is a single-header library for FSM definition with powerful DSL and a callbacks system.
 
-A single-header library for FSM definition with powerful DSL and a callbacks system.
+It's an experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
 Files:
 - `caasm.h` - allows multiple callbacks per slot.
