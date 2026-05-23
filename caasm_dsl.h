@@ -3,6 +3,14 @@
 // #include "aasm_scoped.h"   // defines macros
 // static AASM_Runtime runtime = { /* use macros here */ };
 // #include "aasm_scoped.h"   // undefines macros
+//
+//    Good to know facts:
+//
+// - States and events MUST be defined as enums with values
+//   starting at 0 and increasing sequentially.
+// - Enum identifiers MUST carry the prefixes STATE_ and EVENT_,
+//   e.g. STATE_SLEEPING, EVENT_RUN.
+// - The FROM() macro supports at most 8 source states.
 
 #ifdef AASM_SCOPED
 
