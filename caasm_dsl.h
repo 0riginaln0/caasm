@@ -1,5 +1,4 @@
-//    In case you don't want to pollute the global with
-//    pretty macros.
+//    Use this DSL in the following way:
 //
 // #include "aasm_scoped.h"   // defines macros
 // static AASM_Runtime runtime = { /* use macros here */ };
