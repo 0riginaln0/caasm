@@ -96,6 +96,36 @@ int main(void) {
 
 All callbacks are optional.
 
+FSM with callbacks:
+```c
+static AASM_Runtime runtime = {
+  AASM_STATES(
+    INITIAL_STATE(SLEEPING, BEFORE_ENTER(do_something)),
+
+    STATE(RUNNING, BEFORE_ENTER(state_running_before_enter)),
+
+    STATE(CLEANING, BEFORE_ENTER(state_cleaning_before_enter))
+  ),
+  
+  AASM_EVENTS(
+    EVENT(RUN, 
+      BEFORE(event_run_before), AFTER(notify_somebody),
+      TRANSITIONS({FROM(SLEEPING), TO(RUNNING), AFTER(transition_after_run)})),
+    
+    EVENT(CLEAN,
+      TRANSITIONS({FROM(RUNNING), TO(CLEANING), AFTER(log_run_time)})),
+    
+    EVENT(SLEEP,
+      AFTER(event_sleep_after),
+      TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})),
+  ),
+  
+  .after_all_transitions = log_status_change,
+  .before_all_events = before_all_events,
+  .after_all_events = after_all_events
+};
+```
+
 - AASM_Runtime
   - Fields:
     - States (array of states)
