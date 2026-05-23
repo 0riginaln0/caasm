@@ -108,6 +108,8 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
  #ifdef AASM_OPTIMIZE_TRANSITIONS_LOOKUP
   runtime->transition_table = transition_table;
  #endif
+  
+  bool error_slot_passed = err != NULL ? true : false;
 
   int initial_states = 0;
   for (int i = 0; i < runtime->states_count; i++) {
@@ -117,6 +119,7 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
     }
   }
   if (initial_states != 1) {
+    if (!error_slot_passed) return false;
     if (initial_states == 0) {
       *err = "Your FSM does not have an initial state";
     } else {
@@ -130,7 +133,7 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
   for (int i = 0; i < state_table_size; i++) state_table[i] = NULL;
   
   if (runtime->states_count != state_table_size) {
-    *err = "State table size mismatch";
+    if (error_slot_passed) *err = "State table size mismatch";
     return false;
   }
 
@@ -138,7 +141,7 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
     const AASM_State *s = &runtime->states[i];
 
     if (s->id >= state_table_size) {
-      *err = "State ID exceeds state table size";
+      if (error_slot_passed) *err = "State ID exceeds state table size";
       return false;
     }
     state_table[s->id] = s;
@@ -149,7 +152,7 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
   for (int i = 0; i < event_table_size; i++) event_table[i] = NULL;
 
   if (runtime->events_count != event_table_size) {
-    *err = "Event table size mismatch";
+    if (error_slot_passed) *err = "Event table size mismatch";
     return false;
   }
 
@@ -157,7 +160,7 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
     const AASM_Event *ev = &runtime->events[e];
 
     if (ev->id >= event_table_size) {
-      *err = "Event ID exceeds event table size";
+      if (error_slot_passed) *err = "Event ID exceeds event table size";
       return false;
     }
     event_table[ev->id] = ev;
@@ -178,7 +181,7 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
 
         int idx = from_state * event_table_size + ev->id;
         if (idx >= transition_table_size) {
-          *err = "Transition index exceeds transition table size";
+          if (error_slot_passed) *err = "Transition index exceeds transition table size";
           return false;
         }
         transition_table[idx] = tr;
