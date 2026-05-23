@@ -84,6 +84,10 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
 #define AASM_IMPLEMENTATION
 #ifdef AASM_IMPLEMENTATION
 
+/// @brief Initializes the FSM runtime.
+///
+/// @warning The runtime and all its substructures must NOT contain garbage‑initialized
+///          callback pointers.
 bool aasm_init(AASM_Runtime *runtime, void *ctx,
              #ifdef AASM_OPTIMIZE_STATES_LOOKUP
                const AASM_State **state_table, int state_table_size,
@@ -183,8 +187,6 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
     }  
   }
  #endif
-
-  // Init to NULL all non-provided callbacks. though, maybe those are NULL by default...
 
   return true;
 }
