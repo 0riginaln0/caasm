@@ -2,8 +2,11 @@
 #include <string.h>
 #include <stdio.h>
 
+#define AASM_OPTIMIZE_STATES_LOOKUP
+#define AASM_OPTIMIZE_EVENTS_LOOKUP
+#define AASM_OPTIMIZE_TRANSITIONS_LOOKUP
 #define AASM_IMPLEMENTATION
-#include "caasm_optimized.h"
+#include "caasm.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 

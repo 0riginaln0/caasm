@@ -58,9 +58,9 @@ static const AASM_State fsm_states[] = {
 };
 
 static const AASM_Transition run_transitions[] = {{
-    .from = (AASM_State_ID[]){STATE_SLEEPING},
-    .from_count = 1,
-    .to = STATE_RUNNING,
+  .from = (AASM_State_ID[]){STATE_SLEEPING},
+  .from_count = 1,
+  .to = STATE_RUNNING,
 }};
 
 static const AASM_Transition clean_transitions[] = {{
@@ -87,7 +87,7 @@ static AASM_Runtime runtime = {
 };
 
 int main(void) {
-  const char *err = NULL;
+  char *err = NULL;
   bool ok = aasm_init(&runtime, NULL, &err);
   if (!ok) {
     printf("Error with your FSM: %s\n", err);

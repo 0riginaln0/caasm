@@ -1,26 +1,25 @@
 Experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
-A single-header (spirituality) library for FSM definition with powerful DSL and a callbacks system.
+A single-header library for FSM definition with powerful DSL and a callbacks system.
 
 Files:
 - `caasm.h` - allows multiple callbacks per slot.
-- `caasm_single_callback.h` - allows only one callback per slot.
-- `caasm_optimized.h` - O(1) states, events and transitions lookup instead of linear. (With the caveat for the transitions lookup: there can be only one transtion defined to respond to a particular event from a particular state)
-- `caasm_macros.h` - macros for eliminating the boilerplate.
-- `caasm_prettier_macros.h` - even more prettier macros for eliminating even more boilerplate.
-- `caasm_scoped_macros.h` - same as the previous one, but made in a way that don't pollute globals.
+- `caasm_dsl.h` - Pretty scoped macros for eliminating the boilerplate.
+
+Configurations:
+- `#define AASM_OPTIMIZE_STATES_LOOKUP`: reduces state search complexity from O(N) to O(1).
+- `#define AASM_OPTIMIZE_EVENTS_LOOKUP`: reduces event search complexity from O(N) to O(1).
+- `#define AASM_OPTIMIZE_TRANSITIONS_LOOKUP`: reduces transition search complexity from O(N) to O(1), imposing the constraint: only one transition from each state-event pair.
 
 Interactive demo examples:
 
 Run them with `gcc job.c -o j.exe && ./j.exe`
 
 - `job.c`: Separate arrays for states, events, transitions. Begin with this example.
+- `job_optimized.c`: The same example as previous, but with configuration for O(1) states, events and transitions lookups.
 - `job_inplace.c`: In‑place FSM definition using compound literals. (Check this one to compare with the next example)
-- `job_macros.c`: Fancy macros eliminating all boilerplate.
-- `job_callbacks.c`: Sketch of using callbacks with a state machine.
-- `job_prettier_macros.c`: Previous example using prettier macros.
-- `job_optimized.c`: O(1) states, events and transitions lookup.
-- `job_scoped.c`: usage of the scoped macros.
+- `job_dsl.c`: Fancy macros eliminating all of the boilerplate.
+- `job_dsl_w_callbacks.c`: Callbacks usage example.
 
 The Ruby's original AASM Job code:
 ```ruby
@@ -61,23 +60,38 @@ enum Event {
   EVENT_SLEEP,
 };
 
+#include "caasm_dsl.h"
 static AASM_Runtime runtime = {
   AASM_STATES(
     INITIAL_STATE(SLEEPING),
-    STATE(RUNNING), STATE(CLEANING)
+    STATE(RUNNING),
+    STATE(CLEANING),
   ),
 
   AASM_EVENTS(
     EVENT(RUN,
-      TRANSITIONS({FROM(SLEEPING), TO(RUNNING)})),
-    
+      TRANSITIONS({FROM(SLEEPING), TO(RUNNING)})
+    ),
+
     EVENT(CLEAN,
-      TRANSITIONS({FROM(RUNNING), TO(CLEANING)})),
-    
+      TRANSITIONS({FROM(RUNNING), TO(CLEANING)})
+    ),
+
     EVENT(SLEEP,
-      TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})),
+      TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})
+    ),
   ),
 };
+#include "caasm_dsl.h"
+
+int main(void) {
+  char *err = NULL;
+  bool ok = aasm_init(&runtime, NULL, &err);
+  bool transition_occurred = aasm_fire_event(&runtime, EVENT_RUN); // true SLEEPING -> RUNNING
+  transition_occured = aasm_fire_event(&runtime, EVENT_CLEAN); // true RUNNING -> CLEANING
+  transition_occured = aasm_fire_event(&runtime, EVENT_RUN); // false
+  transition_occured = aasm_fire_event(&runtime, EVENT_SLEEP); // true CLEANING -> SLEEPING
+}
 ```
 
 All callbacks are optional.

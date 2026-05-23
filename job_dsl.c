@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#define AASM_USE_MACROS
 #define AASM_IMPLEMENTATION
 #include "caasm.h"
 
@@ -52,36 +51,32 @@ static int parse_event(const char* input, AASM_Event_ID* event) {
   return 0;
 }
 
+#include "caasm_dsl.h"
 static AASM_Runtime runtime = {
   AASM_STATES(
-    AASM_STATE(STATE_SLEEPING, .is_initial = true),
-    AASM_STATE(STATE_RUNNING),
-    AASM_STATE(STATE_CLEANING)
+    INITIAL_STATE(SLEEPING),
+    STATE(RUNNING),
+    STATE(CLEANING),
   ),
 
   AASM_EVENTS(
-    AASM_EVENT(EVENT_RUN,
-      AASM_TRANSITIONS({
-        AASM_FROM(STATE_SLEEPING), .to = STATE_RUNNING
-      })
+    EVENT(RUN,
+      TRANSITIONS({FROM(SLEEPING), TO(RUNNING)})
     ),
-    
-    AASM_EVENT(EVENT_CLEAN,
-      AASM_TRANSITIONS({
-        AASM_FROM(STATE_RUNNING), .to = STATE_CLEANING
-      })
+
+    EVENT(CLEAN,
+      TRANSITIONS({FROM(RUNNING), TO(CLEANING)})
     ),
-    
-    AASM_EVENT(EVENT_SLEEP,
-      AASM_TRANSITIONS({
-        AASM_FROM(STATE_RUNNING, STATE_CLEANING), .to = STATE_SLEEPING
-      })
-    )
-  )
+
+    EVENT(SLEEP,
+      TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})
+    ),
+  ),
 };
+#include "caasm_dsl.h"
 
 int main(void) {
-  const char *err = NULL;
+  char *err = NULL;
   bool ok = aasm_init(&runtime, NULL, &err);
   if (!ok) {
     printf("Error with your FSM: %s\n", err);

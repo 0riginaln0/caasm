@@ -28,17 +28,15 @@
 #undef TRANSITIONS
 #undef FROM
 #undef TO
-#ifndef AASM_SINGLE_CALLBACK
-  #undef BEFORE_ENTER
-  #undef ENTER
-  #undef AFTER_ENTER
-  #undef BEFORE_EXIT
-  #undef EXIT
-  #undef AFTER_EXIT
-  #undef BEFORE
-  #undef AFTER
-  #undef GUARD
-#endif
+#undef BEFORE_ENTER
+#undef ENTER
+#undef AFTER_ENTER
+#undef BEFORE_EXIT
+#undef EXIT
+#undef AFTER_EXIT
+#undef BEFORE
+#undef AFTER
+#undef GUARD
 
 #undef AASM_SCOPED
 #else
@@ -85,35 +83,33 @@
   .from_count = sizeof((AASM_State_ID[]){ STATE_IDS(__VA_ARGS__) }) / sizeof(AASM_State_ID)
 #define TO(state_id)  .to = STATE_##state_id
 
-#ifndef AASM_SINGLE_CALLBACK
-  #define BEFORE_ENTER(...) \
-    .before_enter       = (AASM_Callback[]){ __VA_ARGS__ }, \
-    .before_enter_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
-  #define ENTER(...) \
-    .enter       = (AASM_Callback[]){ __VA_ARGS__ }, \
-    .enter_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
-  #define AFTER_ENTER(...) \
-    .after_enter       = (AASM_Callback[]){ __VA_ARGS__ }, \
-    .after_enter_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
-  #define BEFORE_EXIT(...) \
-    .before_exit       = (AASM_Callback[]){ __VA_ARGS__ }, \
-    .before_exit_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
-  #define EXIT(...) \
-    .exit       = (AASM_Callback[]){ __VA_ARGS__ }, \
-    .exit_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
-  #define AFTER_EXIT(...) \
-    .after_exit       = (AASM_Callback[]){ __VA_ARGS__ }, \
-    .after_exit_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
-  #define BEFORE(...) \
-    .before       = (AASM_Callback[]){ __VA_ARGS__ }, \
-    .before_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
-  #define AFTER(...) \
-    .after       = (AASM_Callback[]){ __VA_ARGS__ }, \
-    .after_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
-  #define GUARD(...) \
-    .guards       = (AASM_Guard_Callback[]){ __VA_ARGS__ }, \
-    .guards_count = sizeof((AASM_Guard_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Guard_Callback)
-#endif
+#define BEFORE_ENTER(...) \
+  .before_enter       = (AASM_Callback[]){ __VA_ARGS__ }, \
+  .before_enter_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
+#define ENTER(...) \
+  .enter       = (AASM_Callback[]){ __VA_ARGS__ }, \
+  .enter_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
+#define AFTER_ENTER(...) \
+  .after_enter       = (AASM_Callback[]){ __VA_ARGS__ }, \
+  .after_enter_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
+#define BEFORE_EXIT(...) \
+  .before_exit       = (AASM_Callback[]){ __VA_ARGS__ }, \
+  .before_exit_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
+#define EXIT(...) \
+  .exit       = (AASM_Callback[]){ __VA_ARGS__ }, \
+  .exit_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
+#define AFTER_EXIT(...) \
+  .after_exit       = (AASM_Callback[]){ __VA_ARGS__ }, \
+  .after_exit_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
+#define BEFORE(...) \
+  .before       = (AASM_Callback[]){ __VA_ARGS__ }, \
+  .before_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
+#define AFTER(...) \
+  .after       = (AASM_Callback[]){ __VA_ARGS__ }, \
+  .after_count = sizeof((AASM_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Callback)
+#define GUARD(...) \
+  .guards       = (AASM_Guard_Callback[]){ __VA_ARGS__ }, \
+  .guards_count = sizeof((AASM_Guard_Callback[]){ __VA_ARGS__ }) / sizeof(AASM_Guard_Callback)
 
 
 #define AASM_SCOPED
