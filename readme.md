@@ -1,17 +1,19 @@
+# cAASM - Ruby state machines in C
+
 [cAASM](https://github.com/0riginaln0/caasm) is a single-header library for FSM definition with powerful DSL and a callbacks system.
 
 It's an experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
-Files:
+## Library files:
 - `caasm.h` - allows multiple callbacks per slot.
 - `caasm_dsl.h` - Pretty scoped macros for eliminating the boilerplate.
 
-Configurations:
+## Configurations:
 - `#define AASM_OPTIMIZE_STATES_LOOKUP`: reduces state search complexity from O(N) to O(1).
 - `#define AASM_OPTIMIZE_EVENTS_LOOKUP`: reduces event search complexity from O(N) to O(1).
 - `#define AASM_OPTIMIZE_TRANSITIONS_LOOKUP`: reduces transition search complexity from O(N) to O(1), imposing the constraint: only one transition from each state-event pair.
 
-Interactive demo examples:
+## Interactive demo examples:
 
 Run them with `gcc job.c -o j.exe && ./j.exe`
 
@@ -21,7 +23,8 @@ Run them with `gcc job.c -o j.exe && ./j.exe`
 - `job_dsl.c`: Fancy macros eliminating all of the boilerplate.
 - `job_dsl_w_callbacks.c`: Callbacks usage example.
 
-The Ruby's original AASM Job code:
+## Show me the code!
+The Ruby's AASM Job code:
 ```ruby
 class Job
   include AASM
@@ -94,10 +97,38 @@ int main(void) {
 }
 ```
 
-All callbacks are optional.
+FSM with callbacks (All callbacks are optional)
 
-FSM with callbacks:
+```ruby
+class Job
+  include AASM
+
+  aasm do
+    state :sleeping, initial: true, before_enter: :do_something
+    state :running, before_enter: :state_running_before_enter
+    state :cleaning, before_enter: :state_cleaning_before_enter
+
+    after_all_transitions :log_status_change
+    before_all_events :before_all_events
+    after_all_events :after_all_events
+
+    event :run, before: :event_run_before, after: :notify_somebody do
+      transitions from: :sleeping, to: :running, after: :transition_after_run
+    end
+
+    event :clean do
+      transitions from: :running, to: :cleaning, after: :log_run_time
+    end
+
+    event :sleep, after: :event_sleep_after do
+      transitions from: [:running, :cleaning], to: :sleeping
+    end
+  end
+end
+```
+
 ```c
+#include "caasm_dsl.h"
 static AASM_Runtime runtime = {
   AASM_STATES(
     INITIAL_STATE(SLEEPING, BEFORE_ENTER(do_something)),
@@ -106,23 +137,26 @@ static AASM_Runtime runtime = {
 
     STATE(CLEANING, BEFORE_ENTER(state_cleaning_before_enter))
   ),
-  
-  AASM_EVENTS(
-    EVENT(RUN, BEFORE(event_run_before), AFTER(notify_somebody),
-      TRANSITIONS({FROM(SLEEPING), TO(RUNNING), AFTER(transition_after_run)})),
-    
-    EVENT(CLEAN,
-      TRANSITIONS({FROM(RUNNING), TO(CLEANING), AFTER(log_run_time)})),
-    
-    EVENT(SLEEP, AFTER(event_sleep_after),
-      TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})),
-  ),
-  
+
   .after_all_transitions = log_status_change,
   .before_all_events = before_all_events,
   .after_all_events = after_all_events
+
+  AASM_EVENTS(
+    EVENT(RUN, BEFORE(event_run_before), AFTER(notify_somebody),
+      TRANSITIONS({FROM(SLEEPING), TO(RUNNING), AFTER(transition_after_run)})),
+
+    EVENT(CLEAN,
+      TRANSITIONS({FROM(RUNNING), TO(CLEANING), AFTER(log_run_time)})),
+
+    EVENT(SLEEP, AFTER(event_sleep_after),
+      TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})),
+  ),
 };
+#include "caasm_dsl.h"
 ```
+
+## List of all callbacks per structure
 
 - AASM_Runtime
   - Fields:
@@ -162,7 +196,7 @@ static AASM_Runtime runtime = {
     - guards
     - after
 
-# Callback Execution Order
+## Callback Execution Order
 
 The original library contains numerous callbacks. The AI ​​claims that all of them can be useful.
 
