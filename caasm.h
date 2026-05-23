@@ -189,55 +189,6 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
   return true;
 }
 
-/*
-  // Callback execution order
-  // 1. Runtime-level: before_all_events
-  runtime->before_all_events
-
-  // 2. Event-level: before
-  event->before
-
-  // 3. Event-level: guards
-  event->guards
-
-  // 4. Transition-level: guards (for the matching transition)
-  transition->guards
-
-  // If any guard fails (steps 3 or 4), the transition is aborted and
-  // no further callbacks execute
-
-  // 5. Old state: before_exit
-  old_state->before_exit
-
-  // 6. Old state: exit
-  old_state->exit
-
-  // 7. Runtime-level: after_all_transitions
-  runtime->after_all_transitions
-
-  // 8. Transition-level: after
-  transition->after
-
-  // 9. New state: before_enter
-  new_state->before_enter
-
-  // 10. New state: enter
-  new_state->enter
-
-  // 11. UPDATE STATE (runtime->current_state = new_state)
-
-  // 12. Old state: after_exit
-  old_state->after_exit
-
-  // 13. New state: after_enter
-  new_state->after_enter
-
-  // 14. Event-level: after
-  event->after
-
-  // 15. Runtime-level: after_all_events
-  runtime->after_all_events
-*/
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   void *ctx = runtime->ctx;
 
