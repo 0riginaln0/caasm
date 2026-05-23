@@ -108,15 +108,13 @@ static AASM_Runtime runtime = {
   ),
   
   AASM_EVENTS(
-    EVENT(RUN, 
-      BEFORE(event_run_before), AFTER(notify_somebody),
+    EVENT(RUN, BEFORE(event_run_before), AFTER(notify_somebody),
       TRANSITIONS({FROM(SLEEPING), TO(RUNNING), AFTER(transition_after_run)})),
     
     EVENT(CLEAN,
       TRANSITIONS({FROM(RUNNING), TO(CLEANING), AFTER(log_run_time)})),
     
-    EVENT(SLEEP,
-      AFTER(event_sleep_after),
+    EVENT(SLEEP, AFTER(event_sleep_after),
       TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})),
   ),
   
