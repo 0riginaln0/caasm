@@ -4,11 +4,12 @@
 
 It's an experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
 
-## Library files:
-- `caasm.h` - allows multiple callbacks per slot.
+## Overview:
+### Files
+- `caasm.h` - Main library file. You must include it :)
 - `caasm_dsl.h` - Pretty scoped macros for eliminating the boilerplate.
 
-## Configurations:
+### Configurations:
 - `#define AASM_OPTIMIZE_STATES_LOOKUP`: reduces state search complexity from O(N) to O(1).
 - `#define AASM_OPTIMIZE_EVENTS_LOOKUP`: reduces event search complexity from O(N) to O(1).
 - `#define AASM_OPTIMIZE_TRANSITIONS_LOOKUP`: reduces transition search complexity from O(N) to O(1), imposing the constraint: only one transition from each state-event pair.
