@@ -179,7 +179,7 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx,
       for (int f = 0; f < tr->from_count; f++) {
         int from_state = tr->from[f];
 
-        int idx = from_state * event_table_size + ev->id;
+        int idx = from_state * runtime->events_count + ev->id;
         if (idx >= transition_table_size) {
           if (error_slot_passed) *err = "Transition index exceeds transition table size";
           return false;
