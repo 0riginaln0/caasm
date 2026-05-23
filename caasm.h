@@ -240,8 +240,8 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   transition = runtime->transition_table[transition_idx];
   if (!transition) return false;
  #else
-  for (int i = 0; i < event->transitions_count; i++) {
-    const AASM_Transition *temp_transition = &event->transitions[i];
+  for (int t = 0; t < event->transitions_count; t++) {
+    const AASM_Transition *temp_transition = &event->transitions[t];
     for (int i = 0; i < temp_transition->from_count; i++) {
       if (temp_transition->from[i] == runtime->current_state) {
         transition = temp_transition;
