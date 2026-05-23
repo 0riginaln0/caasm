@@ -2,7 +2,7 @@
 
 [cAASM](https://github.com/0riginaln0/caasm) is a single-header C99 library for FSM definition with powerful DSL and a callbacks system.
 
-It's an experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C.
+It's an experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C. For the complete documentation, go to [their](https://github.com/aasm/aasm) repository. Things like _Guards_ callbacks and others are better described there.
 
 ## Overview:
 ### Files
