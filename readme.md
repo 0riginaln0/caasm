@@ -68,24 +68,16 @@ enum Event {
 
 #include "caasm_dsl.h"
 static AASM_Runtime runtime = {
-  AASM_STATES(
-    INITIAL_STATE(SLEEPING),
-    STATE(RUNNING),
-    STATE(CLEANING),
-  ),
+  AASM_STATES(INITIAL_STATE(SLEEPING),
+                      STATE(RUNNING),
+                      STATE(CLEANING)),
 
   AASM_EVENTS(
-    EVENT(RUN,
-      TRANSITIONS({FROM(SLEEPING), TO(RUNNING)})
-    ),
+    EVENT(RUN, TRANSITIONS({FROM(SLEEPING), TO(RUNNING)})),
 
-    EVENT(CLEAN,
-      TRANSITIONS({FROM(RUNNING), TO(CLEANING)})
-    ),
+    EVENT(CLEAN, TRANSITIONS({FROM(RUNNING), TO(CLEANING)})),
 
-    EVENT(SLEEP,
-      TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})
-    ),
+    EVENT(SLEEP, TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})),
   ),
 };
 #include "caasm_dsl.h"
