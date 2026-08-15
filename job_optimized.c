@@ -2,9 +2,6 @@
 #include <string.h>
 #include <stdio.h>
 
-#define AASM_OPTIMIZE_STATES_LOOKUP
-#define AASM_OPTIMIZE_EVENTS_LOOKUP
-#define AASM_OPTIMIZE_TRANSITIONS_LOOKUP
 #define AASM_IMPLEMENTATION
 #include "caasm.h"
 
@@ -100,13 +97,13 @@ static AASM_Runtime runtime = {
 int main(void) {
   char *err = NULL;
   bool ok = aasm_init(&runtime, NULL,
+    &err,
     state_table,
     ARRAY_SIZE(state_table),
     event_table,
     ARRAY_SIZE(event_table),
     transition_table,
-    ARRAY_SIZE(transition_table),
-    &err);
+    ARRAY_SIZE(transition_table));
 
   if (!ok) {
     printf("Error with your FSM: %s\n", err);

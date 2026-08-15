@@ -77,7 +77,7 @@ static AASM_Runtime runtime = {
 
 int main(void) {
   char *err = NULL;
-  bool ok = aasm_init(&runtime, NULL, &err);
+  bool ok = aasm_init(&runtime, NULL, &err, NULL, 0, NULL, 0, NULL, 0);
   if (!ok) {
     printf("Error with your FSM: %s\n", err);
     return 1;

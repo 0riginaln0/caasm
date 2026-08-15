@@ -10,13 +10,15 @@ It's an experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into 
 - `caasm_dsl.h` - Pretty scoped macros for eliminating the boilerplate.
 
 ### Configurations:
-- `#define AASM_OPTIMIZE_STATES_LOOKUP`: reduces state search complexity from O(N) to O(1).
-- `#define AASM_OPTIMIZE_EVENTS_LOOKUP`: reduces event search complexity from O(N) to O(1).
-- `#define AASM_OPTIMIZE_TRANSITIONS_LOOKUP`: reduces transition search complexity from O(N) to O(1), imposing the constraint: only one transition from each state-event pair.
+- State lookup table reduces state search complexity from O(N) to O(1).
+- Events lookup table reduces event search complexity from O(N) to O(1).
+- Transitions lookup table reduces transition search complexity from O(N) to O(1), imposing the constraint: only one transition from each state-event pair.
 
 ## Interactive demo examples:
 
 Run them with `gcc job.c -o j.exe && ./j.exe`
+
+The `job_dsl.c` files show the intended library usage, but other files set you up to understand the constructs hiding behind the macros dsl.
 
 - `job.c`: Separate arrays for states, events, transitions. Begin with this example.
 - `job_optimized.c`: The same example as previous, but with configuration for O(1) states, events and transitions lookups.
@@ -211,4 +213,3 @@ The original library contains numerous callbacks. The AI ​​claims that all o
 | `new_state.after_enter` | Cleanup after entering the new state, runs **after** the state update. |  |
 | `event.after` | Event‑specific cleanup after the transition completes; notifications or side effects. | |
 | `after_all_events` | Global cleanup hook after any event completes; final logging, metrics, or cleanup. | |
-

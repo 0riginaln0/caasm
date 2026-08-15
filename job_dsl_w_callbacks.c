@@ -163,18 +163,18 @@ static AASM_Runtime runtime = {
 
     STATE(CLEANING, BEFORE_ENTER(state_cleaning_before_enter))
   ),
-  
+
   AASM_EVENTS(
     EVENT(RUN, BEFORE(event_run_before), AFTER(notify_somebody),
       TRANSITIONS({FROM(SLEEPING), TO(RUNNING), AFTER(transition_after_run)})),
-    
+
     EVENT(CLEAN,
       TRANSITIONS({FROM(RUNNING), TO(CLEANING), AFTER(log_run_time)})),
-    
+
     EVENT(SLEEP, AFTER(event_sleep_after),
       TRANSITIONS({FROM(RUNNING, CLEANING), TO(SLEEPING)})),
   ),
-  
+
   .after_all_transitions = log_status_change,
   .before_all_events = before_all_events,
   .after_all_events = after_all_events
@@ -193,7 +193,7 @@ int main(void) {
     .clean_count = 0
   };
 
-  bool ok = aasm_init(&runtime, &job_ctx, &err);
+  bool ok = aasm_init(&runtime, &job_ctx, &err, NULL, 0, NULL, 0, NULL, 0);
   if (!ok) {
     printf("Error with your FSM: %s\n", err);
     return 1;

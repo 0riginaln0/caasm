@@ -59,29 +59,29 @@ static AASM_Runtime runtime = {
   },
   .states_count = 3,
   .events = (AASM_Event[]) {
-    { 
+    {
       .id = EVENT_RUN,
       .transitions = (AASM_Transition[]) {{
         .from = (AASM_State_ID[]){STATE_SLEEPING}, .from_count = 1,
         .to = STATE_RUNNING,
       }},
-      .transitions_count = 1 
+      .transitions_count = 1
     },
-    { 
+    {
       .id = EVENT_CLEAN,
       .transitions = (AASM_Transition[]) {{
         .from = (AASM_State_ID[]) { STATE_RUNNING }, .from_count = 1,
         .to = STATE_CLEANING,
       }},
-      .transitions_count = 1 
+      .transitions_count = 1
     },
-    { 
+    {
       .id = EVENT_SLEEP,
       .transitions = (AASM_Transition[]) {{
         .from = (AASM_State_ID[]) { STATE_RUNNING, STATE_CLEANING }, .from_count = 2,
         .to = STATE_SLEEPING,
       }},
-      .transitions_count = 1 
+      .transitions_count = 1
     },
   },
   .events_count = 3,
@@ -89,7 +89,7 @@ static AASM_Runtime runtime = {
 
 int main(void) {
   char *err = NULL;
-  bool ok = aasm_init(&runtime, NULL, &err);
+  bool ok = aasm_init(&runtime, NULL, &err, NULL, 0, NULL, 0, NULL, 0);
   if (!ok) {
     printf("Error with your FSM: %s\n", err);
     return 1;
