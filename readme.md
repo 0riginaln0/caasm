@@ -54,6 +54,7 @@ end
 
 The C AASM Job code:
 ```c
+#define AASM_IMPLEMENTATION
 #include "caasm.h"
 
 enum State {
