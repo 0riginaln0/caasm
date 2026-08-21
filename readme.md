@@ -4,6 +4,14 @@
 
 It's an experiment of bringing Ruby's [AASM](https://github.com/aasm/aasm) into C. For the complete documentation, go to [their](https://github.com/aasm/aasm) repository. Things like _Guards_ callbacks and others are better described there.
 
+- [Overview](#overview)
+  - [Files](#files)
+  - [Configurations](#configurations)
+- [Interactive demo examples](#interactive-demo-examples)
+- [Show me the code!](#show-me-the-code)
+- [List of all callbacks per structure](#list-of-all-callbacks-per-structure)
+- [Callback Execution Order](#callback-execution-order)
+
 ## Overview:
 ### Files
 - `caasm.h` - Main library file. You must include it :)
