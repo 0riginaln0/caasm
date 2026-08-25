@@ -1,9 +1,7 @@
 #ifndef AASM_H
 #define AASM_H
 
-#include <stdbool.h>
 #include <stdint.h>
-#include <stddef.h>
 
 typedef uint8_t AASM_State_ID;
 typedef uint8_t AASM_Event_ID;
@@ -71,7 +69,11 @@ bool aasm_init(AASM_Runtime *runtime, void *ctx, char **err,
                const AASM_Transition **transition_table, int transition_table_size);
 bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id);
 
+#endif /* AASM_H */
 #ifdef AASM_IMPLEMENTATION
+
+#include <stdbool.h>
+#include <stddef.h>
 
 /// @brief Initializes the FSM runtime.
 ///
@@ -332,5 +334,4 @@ bool aasm_fire_event(AASM_Runtime *runtime, AASM_Event_ID event_id) {
   return true;
 }
 
-#endif
-#endif
+#endif /* AASM_IMPLEMENTATION */
